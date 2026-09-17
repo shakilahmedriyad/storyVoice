@@ -1,0 +1,7 @@
+import { Headphones, Pause, SkipBack, SkipForward } from "lucide-react";
+import NavHeader from "./navheader";
+import { Button } from "@/components/ui/button";
+
+export default function PlayerPage() {
+  return <div><NavHeader /><div className="mx-auto max-w-3xl px-6 py-14 text-center md:px-9"><div className="mx-auto flex size-28 items-center justify-center rounded-2xl bg-ink text-ink-foreground"><Headphones size={40} /></div><p className="mt-7 text-sm font-medium text-primary">Now playing</p><h2 className="mt-1 font-display text-4xl font-semibold">The Silent City</h2><p className="mt-1 text-muted-foreground">Chapter 7 - The Stranger</p><div className="mx-auto mt-12 max-w-xl"><div className="h-2 rounded-full bg-muted"><div className="h-full w-[38%] rounded-full bg-primary" /></div><div className="mt-2 flex justify-between text-xs text-muted-foreground"><span>14:32</span><span>42:17</span></div></div><div className="mt-8 flex items-center justify-center gap-4"><Button variant="ghost" size="icon-lg" aria-label="Previous chapter"><SkipBack /></Button><Button size="icon-lg" className="rounded-full" aria-label="Pause"><Pause fill="currentColor" /></Button><Button variant="ghost" size="icon-lg" aria-label="Next chapter"><SkipForward /></Button></div></div></div>;
+}
