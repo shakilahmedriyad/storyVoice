@@ -1,0 +1,24 @@
+{
+  "name": "@repo/auth",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    "./auth": "./src/auth.ts",
+    "./authClient": "./src/client.ts"
+  },
+  "scripts": {
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@repo/database": "workspace:*",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*"
+  },
+  "peerDependencies": {
+    "better-auth": "^1.6.19",
+    "@types/node": "^22.15.3",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@repo/database": "workspace:*",
+    "dotenv": "^17.4.2"
+  }
+}
