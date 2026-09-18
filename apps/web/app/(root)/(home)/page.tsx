@@ -56,7 +56,7 @@ function AudioPreview() {
           <p className="text-[11px] uppercase tracking-[0.12em] text-ink-muted">
             Now playing
           </p>
-          <h2 className="mt-1 truncate font-sans text-xl font-bold tracking-normal">
+          <h2 className="mt-1 truncate text-xl font-bold tracking-normal">
             The Silent City
           </h2>
           <p className="mt-0.5 text-sm text-ink-muted">Elena Carter</p>
@@ -114,7 +114,7 @@ function FeatureCard({ feature }: { feature: (typeof features)[number] }) {
       <div className="flex size-9 items-center justify-center rounded-lg bg-primary/15 text-primary-foreground">
         <Icon size={17} />
       </div>
-      <h3 className="mt-4 font-sans text-lg font-bold tracking-normal">
+      <h3 className="mt-4 text-lg font-bold tracking-normal">
         {feature.title}
       </h3>
       <p className="mt-1.5 max-w-67.5 text-sm leading-5 text-muted-foreground">
@@ -136,7 +136,7 @@ export default function Home() {
             <Sparkles size={13} className="text-primary" />
             AI narration studio
           </Badge>
-          <h1 className="mt-6 max-w-127.5 font-sans text-5xl font-bold leading-[0.98] tracking-[-0.04em] sm:text-6xl">
+          <h1 className="mt-6 max-w-127.5 text-5xl font-bold leading-[0.98] tracking-[-0.04em] sm:text-6xl">
             Turn any book into an immersive audiobook.
           </h1>
           <p className="mt-6 max-w-127.5 text-base leading-7 text-muted-foreground sm:text-lg">
@@ -163,7 +163,7 @@ export default function Home() {
       </section>
 
       <section className="py-20 md:py-24">
-        <h2 className="max-w-130 font-sans text-4xl font-bold leading-[1.05] tracking-[-0.035em]">
+        <h2 className="max-w-130 text-4xl font-bold leading-[1.05] tracking-[-0.035em]">
           Everything you need to bring books to life
         </h2>
         <div className="mt-9 grid gap-3 md:grid-cols-3">
@@ -171,7 +171,7 @@ export default function Home() {
             <FeatureCard key={feature.title} feature={feature} />
           ))}
           <article className="ink-panel flex min-h-40.5 flex-col justify-between p-5">
-            <h3 className="font-sans text-lg font-bold tracking-normal">
+            <h3 className="text-lg font-bold tracking-normal">
               Start with your first book
             </h3>
             <Button className="w-fit" size="sm">

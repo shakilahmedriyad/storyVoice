@@ -9,7 +9,7 @@ const robotoHeading = Roboto({
   variable: "--font-heading",
 });
 
-const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-sans" });
+const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-body" });
 
 export const metadata: Metadata = {
   title: "StoryVoice - Audio Book",
