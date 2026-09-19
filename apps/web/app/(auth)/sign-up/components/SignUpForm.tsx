@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { AuthAside } from "../../components/AuthAside";
+import { authClient } from "@repo/auth/authClient";
+import { redirect } from "next/navigation";
 
 const signUpSchema = z
   .object({
@@ -41,7 +43,14 @@ export function SignUpForm() {
   });
 
   function onSubmit(values: SignUpValues) {
-    void values;
+    try {
+      authClient.signUp.email({
+        email: values.email,
+        name: values.name,
+        password: values.password,
+        callbackURL: "/library",
+      });
+    } catch (error) {}
   }
 
   return (

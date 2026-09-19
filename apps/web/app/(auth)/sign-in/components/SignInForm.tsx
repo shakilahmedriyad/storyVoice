@@ -4,6 +4,7 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { authClient } from "@repo/auth/authClient";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +15,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { AuthAside } from "../../components/AuthAside";
+import { redirect } from "next/navigation";
 
 const signInSchema = z.object({
   email: z.email("Enter a valid email address."),
@@ -31,8 +33,16 @@ export function SignInForm() {
     },
   });
 
-  function onSubmit(values: SignInValues) {
-    void values;
+  async function onSubmit(values: SignInValues) {
+    try {
+      await authClient.signIn.email({
+        email: values.email,
+        password: values.password,
+        callbackURL: "/library",
+      });
+    } catch (error) {
+      /// we will show nice error
+    }
   }
 
   return (
