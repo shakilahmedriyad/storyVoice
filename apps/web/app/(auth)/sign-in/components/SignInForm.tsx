@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -12,10 +13,11 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
+  FormError,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { getAuthErrorMessage } from "@/lib/auth-error";
 import { AuthAside } from "../../components/AuthAside";
-import { redirect } from "next/navigation";
 
 const signInSchema = z.object({
   email: z.email("Enter a valid email address."),
@@ -25,6 +27,7 @@ const signInSchema = z.object({
 type SignInValues = z.infer<typeof signInSchema>;
 
 export function SignInForm() {
+  const [authError, setAuthError] = useState<string | null>(null);
   const form = useForm<SignInValues>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -34,14 +37,30 @@ export function SignInForm() {
   });
 
   async function onSubmit(values: SignInValues) {
+    setAuthError(null);
+
     try {
-      await authClient.signIn.email({
+      const { error } = await authClient.signIn.email({
         email: values.email,
         password: values.password,
         callbackURL: "/library",
       });
+
+      if (error) {
+        setAuthError(
+          getAuthErrorMessage(
+            error,
+            "We couldn’t sign you in. Please check your details and try again.",
+          ),
+        );
+      }
     } catch (error) {
-      /// we will show nice error
+      setAuthError(
+        getAuthErrorMessage(
+          error,
+          "We couldn’t connect to the server. Please try again.",
+        ),
+      );
     }
   }
 
@@ -90,8 +109,14 @@ export function SignInForm() {
               </Field>
             </FieldGroup>
 
-            <Button type="submit" className="mt-6 w-full">
-              Sign in
+            <FormError className="mt-6">{authError}</FormError>
+
+            <Button
+              type="submit"
+              className="mt-6 w-full"
+              isDisabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? "Signing in..." : "Sign in"}
             </Button>
           </form>
 

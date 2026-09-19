@@ -1,5 +1,7 @@
+import requireUnAuth from "@/lib/requireUnAuth";
 import { SignUpForm } from "./components/SignUpForm";
 
-export default function SignUpPage() {
+export default async function SignUpPage() {
+  await requireUnAuth();
   return <SignUpForm />;
 }

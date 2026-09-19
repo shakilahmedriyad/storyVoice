@@ -47,4 +47,27 @@ function FieldError({
   );
 }
 
-export { Field, FieldError, FieldGroup, FieldLabel };
+function FormError({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<"div">) {
+  if (!children) return null;
+
+  return (
+    <div
+      role="alert"
+      aria-live="polite"
+      data-slot="form-error"
+      className={cn(
+        "rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
+export { Field, FieldError, FieldGroup, FieldLabel, FormError };

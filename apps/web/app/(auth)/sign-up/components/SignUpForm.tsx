@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -11,11 +12,12 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
+  FormError,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { getAuthErrorMessage } from "@/lib/auth-error";
 import { AuthAside } from "../../components/AuthAside";
 import { authClient } from "@repo/auth/authClient";
-import { redirect } from "next/navigation";
 
 const signUpSchema = z
   .object({
@@ -32,6 +34,7 @@ const signUpSchema = z
 type SignUpValues = z.infer<typeof signUpSchema>;
 
 export function SignUpForm() {
+  const [authError, setAuthError] = useState<string | null>(null);
   const form = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -42,15 +45,33 @@ export function SignUpForm() {
     },
   });
 
-  function onSubmit(values: SignUpValues) {
+  async function onSubmit(values: SignUpValues) {
+    setAuthError(null);
+
     try {
-      authClient.signUp.email({
+      const { error } = await authClient.signUp.email({
         email: values.email,
         name: values.name,
         password: values.password,
         callbackURL: "/library",
       });
-    } catch (error) {}
+
+      if (error) {
+        setAuthError(
+          getAuthErrorMessage(
+            error,
+            "We couldn’t create your account. Please try again.",
+          ),
+        );
+      }
+    } catch (error) {
+      setAuthError(
+        getAuthErrorMessage(
+          error,
+          "We couldn’t connect to the server. Please try again.",
+        ),
+      );
+    }
   }
 
   return (
@@ -128,8 +149,16 @@ export function SignUpForm() {
               </Field>
             </FieldGroup>
 
-            <Button type="submit" className="mt-6 w-full">
-              Create account
+            <FormError className="mt-6">{authError}</FormError>
+
+            <Button
+              type="submit"
+              className="mt-6 w-full"
+              isDisabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting
+                ? "Creating account..."
+                : "Create account"}
             </Button>
           </form>
 

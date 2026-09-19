@@ -2,13 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  BookOpen,
-  Headphones,
-  Library,
-  Plus,
-  Settings,
-} from "lucide-react";
+import { BookOpen, Headphones, Library, Plus, Settings } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import {
   Sidebar,
@@ -36,7 +30,7 @@ export default function DashboardSidebar() {
     <Sidebar>
       <SidebarHeader>
         <Link href="/" className="flex items-center gap-3 px-2 py-1">
-          <Avatar className="flex size-8 items-center justify-center rounded-lg bg-ink text-ink-foreground">
+          <Avatar className="flex size-8 items-center justify-center rounded-lg bg-primary">
             <Headphones size={16} />
           </Avatar>
           <span className="font-display text-xl font-semibold tracking-tight group-data-[state=collapsed]/sidebar:hidden">
@@ -66,15 +60,6 @@ export default function DashboardSidebar() {
             })}
           </SidebarMenu>
         </SidebarGroup>
-        <SidebarGroup className="mt-auto">
-          <div className="rounded-xl bg-ink p-4 text-ink-foreground md:group-data-[state=collapsed]/sidebar:hidden">
-            <BookOpen size={18} className="text-primary" />
-            <p className="mt-3 text-sm font-semibold">Bring a book to life</p>
-            <p className="mt-1 text-xs leading-5 text-ink-muted">
-              Turn a PDF into an immersive listening experience.
-            </p>
-          </div>
-        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter>
@@ -84,7 +69,9 @@ export default function DashboardSidebar() {
           </Avatar>
           <div className="min-w-0 md:group-data-[state=collapsed]/sidebar:hidden">
             <p className="truncate text-sm font-semibold">Riyad</p>
-            <p className="truncate text-xs text-muted-foreground">Personal library</p>
+            <p className="truncate text-xs text-muted-foreground">
+              Personal library
+            </p>
           </div>
         </div>
       </SidebarFooter>
