@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Headphones, Library, Plus, Settings } from "lucide-react";
-import { Avatar } from "@/components/ui/avatar";
+import { useEffect, useRef, useState } from "react";
+import { Headphones, Library, LogOut, Plus, Settings } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { authClient } from "@repo/auth/authClient";
 import {
   Sidebar,
   SidebarContent,
@@ -23,8 +25,51 @@ const navigation = [
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
-export default function DashboardSidebar() {
+type DashboardSidebarProps = {
+  userName: string;
+};
+
+export default function DashboardSidebar({ userName }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
+  const avatarFallback = userName.trim().charAt(0).toUpperCase() || "U";
+
+  useEffect(() => {
+    if (!accountOpen) return;
+
+    function handleOutsideClick(event: MouseEvent) {
+      if (
+        accountMenuRef.current &&
+        !accountMenuRef.current.contains(event.target as Node)
+      ) {
+        setAccountOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setAccountOpen(false);
+    }
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [accountOpen]);
+
+  async function handleSignOut() {
+    setIsSigningOut(true);
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          window.location.href = "/sign-in";
+        },
+      },
+    });
+  }
 
   return (
     <Sidebar>
@@ -41,7 +86,9 @@ export default function DashboardSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+          <SidebarGroupLabel className="group-data-[state=collapsed]/sidebar:hidden">
+            Workspace
+          </SidebarGroupLabel>
           <SidebarMenu>
             {navigation.map((item) => {
               const Icon = item.icon;
@@ -52,7 +99,9 @@ export default function DashboardSidebar() {
                   <SidebarMenuButton asChild isActive={isActive}>
                     <Link href={item.href}>
                       <Icon size={17} />
-                      <span className="truncate">{item.label}</span>
+                      <span className="truncate group-data-[state=collapsed]/sidebar:hidden">
+                        {item.label}
+                      </span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -62,17 +111,56 @@ export default function DashboardSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>
-        <div className="flex items-center gap-3 px-2">
-          <Avatar className="flex size-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-            R
-          </Avatar>
-          <div className="min-w-0 md:group-data-[state=collapsed]/sidebar:hidden">
-            <p className="truncate text-sm font-semibold">Riyad</p>
-            <p className="truncate text-xs text-muted-foreground">
-              Personal library
-            </p>
-          </div>
+      <SidebarFooter className="relative">
+        <div ref={accountMenuRef}>
+          <button
+            type="button"
+            className="flex w-full items-center gap-3 rounded-lg px-2 py-1 text-left transition-colors hover:bg-muted/50"
+            onClick={() => setAccountOpen((open) => !open)}
+            aria-expanded={accountOpen}
+            aria-haspopup="menu"
+          >
+            <Avatar className="size-8 min-w-8 overflow-hidden bg-primary">
+              <AvatarFallback className="bg-primary text-xs font-bold leading-none text-primary-foreground">
+                {avatarFallback}
+              </AvatarFallback>
+            </Avatar>
+            <div className="min-w-0 md:group-data-[state=collapsed]/sidebar:hidden">
+              <p className="truncate text-sm font-semibold">{userName}</p>
+              <p className="truncate text-xs text-muted-foreground">
+                Personal library
+              </p>
+            </div>
+          </button>
+
+          {accountOpen ? (
+            <div
+              className="surface absolute bottom-full left-2 right-2 z-50 mb-2 p-2 shadow-lg group-data-[state=collapsed]/sidebar:bottom-2 group-data-[state=collapsed]/sidebar:left-full group-data-[state=collapsed]/sidebar:right-auto group-data-[state=collapsed]/sidebar:mb-0 group-data-[state=collapsed]/sidebar:ml-2 group-data-[state=collapsed]/sidebar:w-52"
+              role="menu"
+            >
+              <Link
+                href="/settings"
+                onClick={() => setAccountOpen(false)}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors hover:bg-muted/60"
+                role="menuitem"
+              >
+                <Settings size={18} />
+                <span className="font-medium">Settings</span>
+              </Link>
+              <button
+                type="button"
+                className="flex w-full items-center gap-3 rounded-lg border-t px-3 py-3 text-left text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+                role="menuitem"
+              >
+                <LogOut size={18} />
+                <span className="font-medium">
+                  {isSigningOut ? "Signing out..." : "Log out"}
+                </span>
+              </button>
+            </div>
+          ) : null}
         </div>
       </SidebarFooter>
     </Sidebar>
