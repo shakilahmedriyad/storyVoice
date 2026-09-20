@@ -48,7 +48,7 @@ const createAudioBookSchema = z.object({
 });
 
 type CreateAudioBookFormInput = z.input<typeof createAudioBookSchema>;
-type CreateAudioBookFormValues = z.output<typeof createAudioBookSchema>;
+export type CreateAudioBookFormValues = z.output<typeof createAudioBookSchema>;
 
 export default function CreateAudioBookForm() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -85,16 +85,11 @@ export default function CreateAudioBookForm() {
   async function handleSubmit(values: CreateAudioBookFormValues) {
     const selectedFile = values.file;
     if (!(selectedFile instanceof File)) return;
-
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-    formData.append("language", values.language);
-    formData.append("style", values.style);
-    formData.append("pacing", values.pacing);
-    formData.append("instructions", values.instructions);
+    console.log(values);
+    return;
 
     try {
-      await createAudioBook(formData);
+      await createAudioBook(values);
     } catch {
       form.setError("root.server", {
         message: "Something went wrong while creating your audiobook.",
@@ -138,7 +133,7 @@ export default function CreateAudioBookForm() {
             or browse files
           </span>
           <span className="mt-2 text-xs text-muted-foreground">
-            PDF up to 20MB
+            PDF up to 10MB
           </span>
         </label>
 
@@ -162,10 +157,13 @@ export default function CreateAudioBookForm() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="English">English</SelectItem>
-                      <SelectItem value="Bengali">Bengali</SelectItem>
-                      <SelectItem value="Spanish">Spanish</SelectItem>
-                      <SelectItem value="French">French</SelectItem>
+                      <SelectItem id="English">English</SelectItem>
+                      <SelectItem id="Bengla">Bangla</SelectItem>
+                      <SelectItem id="Hindi">Hindi</SelectItem>
+                      <SelectItem id="Urdu">Urdu</SelectItem>
+                      <SelectItem id="Arabic">Arabic</SelectItem>
+                      <SelectItem id="Spanish">Spanish</SelectItem>
+                      <SelectItem id="French">French</SelectItem>
                     </SelectContent>
                   </Select>
                   <FieldError>{fieldState.error?.message}</FieldError>
@@ -187,9 +185,13 @@ export default function CreateAudioBookForm() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem id="Clasic">Clasic</SelectItem>
                       <SelectItem id="Cinematic">Cinematic</SelectItem>
-                      <SelectItem id="Classic">Classic</SelectItem>
-                      <SelectItem id="Calm">Calm</SelectItem>
+                      <SelectItem id="Calm" value="Calm">
+                        Calm
+                      </SelectItem>
+                      <SelectItem id="Playful">Playful</SelectItem>
+                      <SelectItem id="Documentary">Documentary</SelectItem>
                     </SelectContent>
                   </Select>
                   <FieldError>{fieldState.error?.message}</FieldError>
@@ -228,7 +230,8 @@ export default function CreateAudioBookForm() {
             <Textarea
               aria-label="instruction"
               id="instructions"
-              className="h-24 min-h-24 max-h-24 resize-none rounded-lg bg-card"
+              rows={10}
+              className="h-24 min-h-32 max-h-32 resize-none rounded-lg bg-card"
               placeholder="e.g. make the narrator warmer, give the detective a dry humour, shorten the opening"
               {...form.register("instructions")}
             />
