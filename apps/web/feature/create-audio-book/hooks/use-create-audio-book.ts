@@ -1,9 +1,9 @@
-import axios from "axios";
+import apiClient from "@/lib/fast-api-client/axiosClient";
 
 export default function useCreateAudioBook() {
   const createAudioBook = async (data: FormData) => {
     try {
-      const response = await axios.post("/api/converter", data, {
+      const response = await apiClient.post("/api/converter", data, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

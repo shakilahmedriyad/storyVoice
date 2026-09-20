@@ -97,7 +97,7 @@ export default function DashboardSidebar({ userName }: DashboardSidebarProps) {
               return (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton asChild isActive={isActive}>
-                    <Link href={item.href}>
+                    <Link href={item.href} className="min-w-10 min-h-10">
                       <Icon size={17} />
                       <span className="truncate group-data-[state=collapsed]/sidebar:hidden">
                         {item.label}
