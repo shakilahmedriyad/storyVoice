@@ -39,8 +39,16 @@ const createAudioBookSchema = z.object({
       (value) => value instanceof File && value.size <= MAX_FILE_SIZE,
       "Your PDF must be 10MB or smaller.",
     ),
-  language: z.enum(["English", "Spanish", "French"]),
-  style: z.enum(["Cinematic", "Classic", "Calm"]),
+  language: z.enum([
+    "English",
+    "Spanish",
+    "French",
+    "Bangla",
+    "Urdu",
+    "Hindi",
+    "Arabic",
+  ]),
+  style: z.enum(["Cinematic", "Classic", "Calm", "Joyful", "Documentary"]),
   pacing: z.enum(["Balanced", "Relaxed", "Energetic"]),
   instructions: z
     .string()
@@ -83,13 +91,16 @@ export default function CreateAudioBookForm() {
   }
 
   async function handleSubmit(values: CreateAudioBookFormValues) {
-    const selectedFile = values.file;
-    if (!(selectedFile instanceof File)) return;
-    console.log(values);
-    return;
-
+    if (!(values.file instanceof File)) return;
     try {
-      await createAudioBook(values);
+      const formData = new FormData();
+
+      formData.append("file", values.file);
+      formData.append("language", values.language);
+      formData.append("style", values.style);
+      formData.append("pacing", values.pacing);
+      formData.append("instructions", values.instructions);
+      await createAudioBook(formData);
     } catch {
       form.setError("root.server", {
         message: "Something went wrong while creating your audiobook.",

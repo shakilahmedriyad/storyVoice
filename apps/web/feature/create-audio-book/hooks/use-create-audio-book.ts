@@ -1,8 +1,7 @@
-import { CreateAudioBookFormValues } from "@/app/(root)/(dashboard)/create/CreateAudioBookForm";
 import apiClient from "@/lib/fast-api-client/axiosClient";
 
 export default function useCreateAudioBook() {
-  const createAudioBook = async (data: CreateAudioBookFormValues) => {
+  const createAudioBook = async (data: FormData) => {
     try {
       const response = await apiClient.post("/api/converter", data, {
         headers: {
@@ -11,7 +10,7 @@ export default function useCreateAudioBook() {
       });
       return response.data;
     } catch (error) {
-      console.error("Error creating audio book:", error);
+      console.log("Error creating audio book:", error);
       // we will handle error later
     }
   };

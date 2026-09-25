@@ -1,20 +1,22 @@
-from fastapi import APIRouter, UploadFile, File
-from common.ai.gemini_client import client
-from google.genai import types
-from common.chunk.create_chunk import creat_chunk
+from typing import Annotated, cast
+
+from fastapi import APIRouter, Form
+
+from common.audio_converter.state import AudioBookState
+from common.chapter_seperator.chapter_separator import separate_chapter_from_book
+from common.audio_converter.audio_converter import book_graph
+from .contract.audio_book_create_schema import CreateAudioBookSchema
 from feature.edgetts.audio_converter import generate_story
 
 router = APIRouter(prefix="/converter", tags=["Audio Book Converter"])
 
 
 @router.post("/")
-async def audio_book_converter(file: UploadFile = File(...)):
+async def audio_book_converter(form_data: Annotated[CreateAudioBookSchema, Form()]):
     # session = client.chats.create(model="gemini-3.8-flash")
-    pdf_bytes = await file.read()
-    creat_chunk(pdf_bytes)
-
+    file = form_data.file
+    chapters = await separate_chapter_from_book(file=file)
+    book_graph.invoke(AudioBookState({"book": [{"chapters": 1, "start": True}]}))
     return {
         "message": "Welcome to the Audio Book Converter",
-        "filename": file.filename,
-        "content_type": file.content_type,
     }
