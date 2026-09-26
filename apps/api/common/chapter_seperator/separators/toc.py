@@ -3,7 +3,9 @@ from fastapi import UploadFile
 
 
 def get_chapter_entries(toc, target_level=1):
-    return [entry for entry in toc if entry[0] == target_level]
+    chapter_entries = [entry for entry in toc if entry[0] == target_level]
+    chapter_entries.sort(key=lambda ch: ch[2])
+    return chapter_entries
 
 
 def pick_chapter_level(toc):
@@ -24,8 +26,9 @@ def get_chapter_page_ranges(chapter_entries, total_pages):
         else:
             end_page = total_pages  # last chapter goes to end of doc
         ranges.append(
-            {"title": title.strip(), "start_page": start_page, "end_page": end_page}
+            {"title": title.strip(), "start_page": start_page - 1, "end_page": end_page}
         )
+
     return ranges
 
 

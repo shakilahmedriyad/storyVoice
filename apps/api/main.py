@@ -1,3 +1,8 @@
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
 from fastapi import FastAPI
 from server.server import server
 from fastapi.middleware.cors import CORSMiddleware
