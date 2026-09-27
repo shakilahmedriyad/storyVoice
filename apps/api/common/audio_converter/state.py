@@ -25,12 +25,9 @@ class BookConfig(TypedDict):
 
 class ProcessedChapter(TypedDict):
     chapter_title: str
-    chapter_content: str  # LLM-processed text
     chapter_content_edge_tts_format: str  # LLM output prepared for TTS
 
 
 class AudioBookState(TypedDict):
-    # a single dict is easier than a list with one item
     book: BookConfig
-    # the reducer makes returned lists get APPENDED instead of overwriting
     processed_chapters: Annotated[list[ProcessedChapter], operator.add]

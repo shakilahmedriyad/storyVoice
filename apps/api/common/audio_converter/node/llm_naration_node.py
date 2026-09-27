@@ -92,14 +92,10 @@ async def get_voice_catalog(language: str) -> list[dict]:
         tag = v.get("VoiceTag", {})
         catalog.append(
             {
-                "voice": v["ShortName"],  # e.g. "en-US-AriaNeural"
-                "gender": v["Gender"],  # "Male" / "Female"
-                "personalities": tag.get(
-                    "VoicePersonalities", []
-                ),  # e.g. ["Confident","Warm"]
-                "categories": tag.get(
-                    "ContentCategories", []
-                ),  # e.g. ["Narration","Novel"]
+                "voice": v["ShortName"],
+                "gender": v["Gender"],
+                "personalities": tag.get("VoicePersonalities", []),
+                "categories": tag.get("ContentCategories", []),
             }
         )
     return catalog
@@ -113,17 +109,21 @@ async def llm_naration_node(state: AudioBookState):
     book = state["book"]
     pacing = book.get("pace")
     storytelling_style = book.get("storytelling_style")
+    language = book.get("language")
     chapters = book.get("chapters")
+
     current_chapter_index = book.get("current_chapter_index")
     current_chapter = chapters[current_chapter_index]
+
     voice_catalog = await get_voice_catalog(book.get("language"))
+
     prompt = _build_user_prompt(
         chapter_title=current_chapter.get("title"),
-        language=book.get("language"),
-        narration_style=book.get("storytelling_style"),
-        chapter_content={current_chapter.get("content")},
+        language=language,
+        narration_style=storytelling_style,
+        chapter_content=current_chapter.get("content"),
         voice_catalog=voice_catalog,
-        pace=book.get("pace"),
+        pace=pacing,
     )
 
     response = await llm.ainvoke(
@@ -132,10 +132,14 @@ async def llm_naration_node(state: AudioBookState):
             {"role": "user", "content": prompt},
         ]
     )
-    print(response.content)
-
-    print("### processing ###")
-    print(current_chapter.get("title"))
     time.sleep(2)
 
-    return {"book": {**book, "current_chapter_index": current_chapter_index + 1}}
+    new_chapter = {
+        "chapter_title": current_chapter["title"],
+        "chapter_content_edge_tts_format": response.text,
+    }
+
+    return {
+        "book": {**book},
+        "processed_chapters": [new_chapter],
+    }
