@@ -169,7 +169,7 @@ export default function CreateAudioBookForm() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem id="English">English</SelectItem>
-                      <SelectItem id="Bengla">Bangla</SelectItem>
+                      <SelectItem id="Bangla">Bangla</SelectItem>
                       <SelectItem id="Hindi">Hindi</SelectItem>
                       <SelectItem id="Urdu">Urdu</SelectItem>
                       <SelectItem id="Arabic">Arabic</SelectItem>

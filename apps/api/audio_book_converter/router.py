@@ -22,12 +22,12 @@ async def audio_book_converter(form_data: Annotated[CreateAudioBookSchema, Form(
                 "error": "could not find table of content or book does not contain any chapters"
             }
         )
-    # start_audio_converter(
-    #     chapters=chapters,
-    #     language=form_data.language.value,
-    #     storytelling_style=form_data.style.value,
-    #     pacing=form_data.pacing.value,
-    # )
+    await start_audio_converter(
+        chapters=[chapters[2]],
+        language=form_data.language.value,
+        storytelling_style=form_data.style.value,
+        pacing=form_data.pacing.value,
+    )
     return {
         "message": "Welcome to the Audio Book Converter",
     }

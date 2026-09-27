@@ -1,3 +1,5 @@
+import asyncio
+
 from typing import Literal
 
 from langgraph.graph import StateGraph, START, END
@@ -10,8 +12,6 @@ from .node.database_save_node import database_save_node
 from .node.edge_tts_node import edge_tts_node
 
 from .node.llm_naration_node import llm_naration_node
-
-
 
 
 def has_more_chapters(
@@ -44,10 +44,10 @@ builder.add_edge("database_save_node", END)
 audio_book_builder = builder.compile()
 
 
-def start_audio_converter(
+async def start_audio_converter(
     chapters: list[ChapterConfig], language: str, storytelling_style: str, pacing: str
 ):
-    audio_book_builder.invoke(
+    await audio_book_builder.ainvoke(
         AudioBookState(
             {
                 "book": {
