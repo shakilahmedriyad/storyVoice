@@ -61,7 +61,6 @@ story_script = [
 
 
 async def generate_story():
-    print("Generating your listener-friendly Bengali story... Please wait...")
 
     with open("bangla_audiobook.mp3", "wb") as f:
         for character, text in story_script:
