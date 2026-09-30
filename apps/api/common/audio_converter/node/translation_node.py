@@ -21,7 +21,7 @@ Return ONLY the translated chapter. No notes, explanations, summaries, or commen
 """
 
 
-llm = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite")
+llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite")
 
 
 async def translation_node(state: AudioBookState):
@@ -30,6 +30,8 @@ async def translation_node(state: AudioBookState):
     chapters = book["chapters"]
     language = book["language"]
     chapter_content = chapters[current_chapter_index]
+
+    print(f"translating chapter: {chapters[current_chapter_index]['title']}")
 
     prompt = f"""
                 Translate the following chapter to {language}.

@@ -24,7 +24,7 @@ def require_translation(
 
     local_lan = LOCALE_PREFIX_BY_LANGUAGE[ln]
 
-    if local_lan == target_language:
+    if local_lan.lower() == target_language.lower():
         return "llm_naration_node"
 
     return "translation_node"

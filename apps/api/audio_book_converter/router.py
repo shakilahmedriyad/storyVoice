@@ -23,7 +23,7 @@ async def audio_book_converter(form_data: Annotated[CreateAudioBookSchema, Form(
             }
         )
     await start_audio_converter(
-        chapters=[chapters[2]],
+        chapters=chapters,
         language=form_data.language.value,
         storytelling_style=form_data.style.value,
         pacing=form_data.pacing.value,

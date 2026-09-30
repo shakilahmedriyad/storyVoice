@@ -43,7 +43,7 @@ async def get_voice_catalog(language: str) -> list[dict]:
     return catalog
 
 
-llm = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite")
+llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite")
 
 structured_output = llm.with_structured_output(TTSSegmentModel)
 
@@ -52,14 +52,12 @@ async def llm_naration_node(state: AudioBookState):
     book = state["book"]
     pacing = book.get("pace")
     storytelling_style = book.get("storytelling_style")
-    language = book.get("language")
     chapters = book.get("chapters")
 
     current_chapter_index = book.get("current_chapter_index")
     current_chapter = chapters[current_chapter_index]
 
     voice_catalog = await get_voice_catalog(book.get("language"))
-    print(voice_catalog)
     prompt = build_user_prompt(
         chapter_title=current_chapter.get("title"),
         narration_style=storytelling_style,
@@ -67,6 +65,8 @@ async def llm_naration_node(state: AudioBookState):
         voice_catalog=voice_catalog,
         pace=pacing,
     )
+    # we will later stream this as well .
+    print(f"started narating {current_chapter["title"]}")
 
     response = await structured_output.ainvoke(
         [
