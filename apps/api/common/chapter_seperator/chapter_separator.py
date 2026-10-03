@@ -1,13 +1,7 @@
-from fastapi import UploadFile
-from .separators.toc import toc_separator
+"""Compatibility imports for the original misspelled package path."""
 
+from common.chapter_separator.chapter_extractor import extract_chapters
 
-async def separate_chapter_from_book(file: UploadFile):
-    try:
-        chapters = await toc_separator(file)
-        if chapters != None:
-            return chapters
+separate_chapter_from_book = extract_chapters
 
-        #### other separator will come here shortly
-    except Exception as e:
-        print(e)
+__all__ = ["extract_chapters", "separate_chapter_from_book"]

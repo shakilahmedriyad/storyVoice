@@ -1,10 +1,5 @@
-from fastapi import APIRouter
-from audio_book_converter.router import router as audio_book_converter_router
+"""Compatibility import for the original API router module."""
 
+from api.router import api_router as server
 
-
-server = APIRouter(
-    prefix="/api",
-)
-
-server.include_router(audio_book_converter_router)
+__all__ = ["server"]
