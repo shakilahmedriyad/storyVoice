@@ -100,7 +100,8 @@ export default function CreateAudioBookForm() {
       formData.append("style", values.style);
       formData.append("pacing", values.pacing);
       formData.append("instructions", values.instructions);
-      await createAudioBook(formData);
+      const response = await createAudioBook(formData);
+      console.log("response", response);
     } catch {
       form.setError("root.server", {
         message: "Something went wrong while creating your audiobook.",

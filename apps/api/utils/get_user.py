@@ -1,12 +1,32 @@
-from fastapi import Request, Depends
+import os
+from fastapi import HTTPException, Request, Depends
+import httpx
+
+from utils.schema.Ctx import Ctx
 
 
-async def get_user(request: Request):
+async def get_user(request: Request) -> Ctx:
     headers = request.headers
 
-    # Example
     cookie = headers.get("cookie")
-    authorization = headers.get("authorization")
+    if not cookie:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
-    # verify Better Auth session here
-    print(f"Cookie: {cookie}, Authorization: {authorization}")
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            f"{os.getenv('BETTER_AUTH_URL')}/api/auth/get-session",
+            headers={"cookie": cookie},
+        )
+
+    if response.status_code != 200:
+        raise HTTPException(401, "Invalid session")
+
+    data = response.json()
+
+    if not data:
+        raise HTTPException(401, "Unauthorized")
+
+    return Ctx(
+        user=data.get("user"),
+        session=data.get("session"),
+    )

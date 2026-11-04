@@ -1,6 +1,10 @@
 """FastAPI application entry point."""
 
+from contextlib import asynccontextmanager
+
 from dotenv import load_dotenv
+
+from db.database import Base, engine
 
 load_dotenv()
 
@@ -9,11 +13,19 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.router import api_router
 
-app = FastAPI(title="Audio Book API")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+
+
+app = FastAPI(title="Audio Book API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
