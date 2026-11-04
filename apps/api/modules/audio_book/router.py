@@ -16,7 +16,6 @@ router = APIRouter(prefix="/converter", tags=["Audio Book Converter"])
 async def create_audio_book(
     form_data: Annotated[CreateAudioBookSchema, Form()], user: str = Depends(get_user)
 ):
-    return "success"
     chapters = await extract_chapters(form_data.file)
     if not chapters:
         raise HTTPException(

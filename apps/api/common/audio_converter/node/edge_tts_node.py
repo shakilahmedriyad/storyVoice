@@ -44,7 +44,8 @@ async def edge_tts_node(state: AudioBookState):
 
                         # breaking the attempting loop
                         break
-                    except Exception:
+                    except Exception as e:
+                        print(e)
                         if attempt < 4:
                             print(f"[Attempt {attempt}/3] Failed:")
                             print(
