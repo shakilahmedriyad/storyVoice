@@ -1,12 +1,15 @@
 """FastAPI application entry point."""
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
 from contextlib import asynccontextmanager
 
-from dotenv import load_dotenv
 
 from db.database import Base, engine
 
-load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
