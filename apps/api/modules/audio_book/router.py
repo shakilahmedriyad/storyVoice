@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from sqlalchemy import select
 
 from db.database import get_db
 from utils.schema.Ctx import Ctx
@@ -17,6 +17,23 @@ from .schemas import CreateAudioBookSchema
 from .models.model import Book
 
 router = APIRouter(prefix="/converter", tags=["Audio Book Converter"])
+
+
+@router.get("/")
+async def get_audio_book(
+    book_id: int,
+    ctx: Ctx = Depends(get_user),
+    db: AsyncSession = Depends(get_db),
+):
+    user = ctx.user
+    book = await db.execute(
+        select(Book).where(Book.user_id == user.id, Book.id == book_id)
+    )
+
+    return {
+        "message": "success",
+        "code": 200,
+    }
 
 
 @router.post("/")

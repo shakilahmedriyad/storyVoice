@@ -6,7 +6,7 @@ export default function NavHeader() {
       <SidebarTrigger />
       <div>
         <h1 className="font-display text-3xl font-semibold tracking-tight">Create your audiobook</h1>
-        <p className="text-sm text-muted-foreground">Choose a PDF and a narration style.</p>
+        <p className="text-sm text-muted-foreground">Create an audiobook from a PDF and choose its chapters.</p>
       </div>
     </header>
   );

@@ -15,6 +15,7 @@ import {
   FormError,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import ChapterSelection from "@/feature/create-audio-book/components/ChapterSelection";
 import {
   Select,
   SelectContent,
@@ -24,6 +25,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import useCreateAudioBook from "@/feature/create-audio-book/hooks/use-create-audio-book";
+import type {
+  CreatedAudioBook,
+} from "@/feature/create-audio-book/types";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
@@ -62,6 +66,11 @@ export default function CreateAudioBookForm() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [createdBook, setCreatedBook] = useState<CreatedAudioBook | null>(null);
+  const [selectedChapterIds, setSelectedChapterIds] = useState<number[]>([]);
+  const [confirmedChapterIds, setConfirmedChapterIds] = useState<number[] | null>(
+    null,
+  );
   const { createAudioBook } = useCreateAudioBook();
   const form = useForm<
     CreateAudioBookFormInput,
@@ -101,7 +110,20 @@ export default function CreateAudioBookForm() {
       formData.append("pacing", values.pacing);
       formData.append("instructions", values.instructions);
       const response = await createAudioBook(formData);
-      console.log("response", response);
+      if (response.code !== 200) {
+        form.setError("root.server", {
+          message: response.message || "Unable to create your audiobook.",
+        });
+        return;
+      }
+
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set("bookId", String(response.data.book_id));
+      window.history.replaceState(null, "", currentUrl);
+
+      setCreatedBook(response.data);
+      setSelectedChapterIds(response.data.chapters.map((chapter) => chapter.id));
+      setConfirmedChapterIds(null);
     } catch {
       form.setError("root.server", {
         message: "Something went wrong while creating your audiobook.",
@@ -110,8 +132,13 @@ export default function CreateAudioBookForm() {
   }
 
   return (
-    <main>
+    <main
+      className={
+        createdBook ? "h-[calc(100svh-5.5rem)] overflow-hidden" : undefined
+      }
+    >
       <form
+        hidden={createdBook !== null}
         className="mx-auto max-w-3xl px-6 py-9 md:px-9"
         onSubmit={form.handleSubmit(handleSubmit)}
       >
@@ -270,6 +297,18 @@ export default function CreateAudioBookForm() {
           </Button>
         </div>
       </form>
+      {createdBook ? (
+        <ChapterSelection
+          book={createdBook}
+          selectedChapterIds={selectedChapterIds}
+          confirmedChapterIds={confirmedChapterIds}
+          onSelectionChange={(chapterIds) => {
+            setSelectedChapterIds(chapterIds);
+            setConfirmedChapterIds(null);
+          }}
+          onConfirm={setConfirmedChapterIds}
+        />
+      ) : null}
     </main>
   );
 }
