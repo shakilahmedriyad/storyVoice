@@ -8,7 +8,11 @@ from db.database import get_db
 from utils.schema.Ctx import Ctx
 from utils.get_user import get_user
 from common.chapter_separator.chapter_extractor import extract_chapters
-from .service import create_audio_book as run_audio_book_creation, save_audio_book
+from .service import (
+    create_audio_book as run_audio_book_creation,
+    save_audio_book,
+    save_chapters_to_db,
+)
 from .schemas import CreateAudioBookSchema
 from .models.model import Book
 
@@ -29,10 +33,17 @@ async def create_audio_book(
             detail="Could not find a table of contents or chapters in this book.",
         )
 
-    await save_audio_book(form_data, user, chapters, db)
+    book = await save_audio_book(form_data, user, chapters, db)
 
     titles = [chapter["title"] for chapter in chapters]
 
+    await save_chapters_to_db(chapters, book, db)
+
     return {
         "message": "success",
+        "code": 200,
+        "data": {
+            "book_name": form_data.file.filename,
+            "chapters": titles,
+        },
     }

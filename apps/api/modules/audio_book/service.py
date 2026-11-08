@@ -1,5 +1,7 @@
 """Application service for audio book creation."""
 
+import re
+
 from fastapi import HTTPException
 from sqlalchemy import select
 
@@ -9,7 +11,7 @@ from common.audio_converter.state import ChapterConfig
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-from .models.model import Book
+from .models.model import Book, Chapter
 from .schemas import CreateAudioBookSchema
 
 
@@ -32,7 +34,7 @@ async def save_audio_book(
     user: UserModel,
     chapters: list[ChapterConfig],
     db: AsyncSession,
-) -> None:
+) -> Book:
     book_query = select(Book).where(
         Book.name == form_data.file.filename, Book.user_id == user.id
     )
@@ -47,11 +49,39 @@ async def save_audio_book(
         )
 
     book = Book(
-        name=form_data.file.filename,
+        name=form_data.file.filename or "Untitled Book",
         user_id=user.id,
         total_chapters=len(chapters),
     )
 
     db.add(book)
     # saving book to the database
-    book = await db.commit()
+    await db.commit()
+    return book
+
+
+_CONTROL_CHARS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+
+
+def clean(text: str) -> str:
+    text = text.replace("\xad", "")  # soft hyphens from PDF line breaks
+    return _CONTROL_CHARS.sub("", text)  # NUL and other control chars
+
+
+async def save_chapters_to_db(
+    chapters: list[ChapterConfig],
+    book: Book,
+    db: AsyncSession,
+):
+
+    for index, ch in enumerate(chapters):
+        chapter = Chapter(
+            title=clean(ch["title"]),
+            content=clean(ch["content"]),
+            user_id=book.user_id,
+            book_id=book.id,
+            chapter_index=index,
+        )
+        db.add(chapter)
+
+    await db.commit()

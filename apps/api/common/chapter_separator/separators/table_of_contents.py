@@ -5,6 +5,8 @@ from collections import Counter
 import pymupdf
 from fastapi import UploadFile
 
+from common.audio_converter.state import ChapterConfig
+
 
 def _select_chapter_level(toc: list) -> int:
     level_counts = Counter(entry[0] for entry in toc)
@@ -29,10 +31,15 @@ def _build_page_ranges(chapter_entries: list, total_pages: int) -> list[dict]:
 
 
 def _extract_page_text(document, start_page: int, end_page: int) -> str:
-    return "".join(document[page_number].get_text() for page_number in range(start_page - 1, end_page))
+    return "".join(
+        document[page_number].get_text()
+        for page_number in range(start_page - 1, end_page)
+    )
 
 
-async def extract_from_table_of_contents(file: UploadFile):
+async def extract_from_table_of_contents(
+    file: UploadFile,
+) -> list[ChapterConfig] | None:
     contents = await file.read()
     document = pymupdf.open(stream=contents, filetype="pdf")
     toc = document.get_toc()
