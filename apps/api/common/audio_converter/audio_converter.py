@@ -1,3 +1,5 @@
+import asyncio
+
 from langgraph.graph import StateGraph, START, END
 
 from .node.start_node import start_node
