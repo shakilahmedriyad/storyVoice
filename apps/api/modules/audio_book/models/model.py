@@ -41,7 +41,7 @@ class Chapter(Base):
     chapter_index: Mapped[int] = mapped_column(nullable=False)
     user_id: Mapped[str] = mapped_column(String(255), nullable=False)
     book_id: Mapped[int] = mapped_column(nullable=False)
-    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    title: Mapped[str] = mapped_column(Text, nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(

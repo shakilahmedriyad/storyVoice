@@ -35,15 +35,21 @@ async def create_audio_book(
 
     book = await save_audio_book(form_data, user, chapters, db)
 
-    titles = [chapter["title"] for chapter in chapters]
-
-    await save_chapters_to_db(chapters, book, db)
+    chapters = await save_chapters_to_db(chapters, book, db)
+    data = {
+        "book_name": form_data.file.filename,
+        "book_id": book.id,
+        "total_chapters": len(chapters),
+        "language": form_data.language,
+        "storytelling_style": form_data.style,
+        "pacing": form_data.pacing,
+        "chapters": [
+            {"title": chapter.title, "id": chapter.id} for chapter in chapters
+        ],
+    }
 
     return {
         "message": "success",
         "code": 200,
-        "data": {
-            "book_name": form_data.file.filename,
-            "chapters": titles,
-        },
+        "data": data,
     }

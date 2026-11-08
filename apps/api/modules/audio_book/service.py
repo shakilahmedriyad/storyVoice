@@ -38,7 +38,6 @@ async def save_audio_book(
     book_query = select(Book).where(
         Book.name == form_data.file.filename, Book.user_id == user.id
     )
-    print(db)
 
     book = await db.execute(book_query)
 
@@ -73,7 +72,7 @@ async def save_chapters_to_db(
     book: Book,
     db: AsyncSession,
 ):
-
+    local_chapters = []
     for index, ch in enumerate(chapters):
         chapter = Chapter(
             title=clean(ch["title"]),
@@ -82,6 +81,8 @@ async def save_chapters_to_db(
             book_id=book.id,
             chapter_index=index,
         )
+        local_chapters.append(chapter)
         db.add(chapter)
 
     await db.commit()
+    return local_chapters
