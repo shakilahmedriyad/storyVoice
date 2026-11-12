@@ -48,9 +48,13 @@ async def save_audio_book(
         )
 
     book = Book(
+        pacing=form_data.pacing,
+        style=form_data.style,
+        language=form_data.language,
         name=form_data.file.filename or "Untitled Book",
         user_id=user.id,
         total_chapters=len(chapters),
+        chapters=[],
     )
 
     db.add(book)
@@ -80,9 +84,11 @@ async def save_chapters_to_db(
             user_id=book.user_id,
             book_id=book.id,
             chapter_index=index,
+            book=book,
         )
         local_chapters.append(chapter)
-        db.add(chapter)
+
+    db.add_all(local_chapters)
 
     await db.commit()
     return local_chapters

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CloudUpload, FileText, LoaderCircle, X } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import useCreateAudioBook from "@/feature/create-audio-book/hooks/use-create-audio-book";
+import useGetAudioBook from "@/feature/create-audio-book/hooks/use-get-audio-book";
 import type {
   CreatedAudioBook,
 } from "@/feature/create-audio-book/types";
@@ -62,16 +63,26 @@ const createAudioBookSchema = z.object({
 type CreateAudioBookFormInput = z.input<typeof createAudioBookSchema>;
 export type CreateAudioBookFormValues = z.output<typeof createAudioBookSchema>;
 
-export default function CreateAudioBookForm() {
+type CreateAudioBookFormProps = {
+  initialBookId?: string;
+};
+
+export default function CreateAudioBookForm({
+  initialBookId,
+}: CreateAudioBookFormProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [createdBook, setCreatedBook] = useState<CreatedAudioBook | null>(null);
+  const [isLoadingBook, setIsLoadingBook] = useState(Boolean(initialBookId));
+  const [bookLoadError, setBookLoadError] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [selectedChapterIds, setSelectedChapterIds] = useState<number[]>([]);
   const [confirmedChapterIds, setConfirmedChapterIds] = useState<number[] | null>(
     null,
   );
   const { createAudioBook } = useCreateAudioBook();
+  const { getAudioBook } = useGetAudioBook();
   const form = useForm<
     CreateAudioBookFormInput,
     unknown,
@@ -86,6 +97,55 @@ export default function CreateAudioBookForm() {
       instructions: "",
     },
   });
+
+  useEffect(() => {
+    if (!initialBookId) return;
+
+    const bookId = Number(initialBookId);
+    if (!Number.isSafeInteger(bookId) || bookId <= 0) {
+      setBookLoadError("The book ID in this URL is invalid.");
+      setIsLoadingBook(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    setIsLoadingBook(true);
+    setBookLoadError(null);
+
+    getAudioBook(bookId, controller.signal)
+      .then((response) => {
+        if (response.code !== 200) {
+          throw new Error(response.message || "Unable to load this audiobook.");
+        }
+
+        setCreatedBook(response.data);
+        setSelectedChapterIds(response.data.chapters.map((chapter) => chapter.id));
+        setConfirmedChapterIds(null);
+      })
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) {
+          setBookLoadError(
+            error instanceof Error
+              ? error.message
+              : "Unable to load this audiobook.",
+          );
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoadingBook(false);
+      });
+
+    return () => controller.abort();
+  }, [getAudioBook, initialBookId, loadAttempt]);
+
+  function startNewBook() {
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.delete("bookId");
+    window.history.replaceState(null, "", currentUrl);
+    setCreatedBook(null);
+    setBookLoadError(null);
+    setIsLoadingBook(false);
+  }
 
   function selectFile(nextFile: File | undefined) {
     if (!nextFile) return;
@@ -134,11 +194,13 @@ export default function CreateAudioBookForm() {
   return (
     <main
       className={
-        createdBook ? "h-[calc(100svh-5.5rem)] overflow-hidden" : undefined
+        createdBook || isLoadingBook || bookLoadError
+          ? "h-[calc(100svh-5.5rem)] overflow-hidden"
+          : undefined
       }
     >
       <form
-        hidden={createdBook !== null}
+        hidden={createdBook !== null || isLoadingBook || bookLoadError !== null}
         className="mx-auto max-w-3xl px-6 py-9 md:px-9"
         onSubmit={form.handleSubmit(handleSubmit)}
       >
@@ -297,6 +359,37 @@ export default function CreateAudioBookForm() {
           </Button>
         </div>
       </form>
+      {isLoadingBook ? (
+        <div
+          className="flex h-full min-h-64 items-center justify-center gap-3 text-sm text-muted-foreground"
+          role="status"
+        >
+          <LoaderCircle className="animate-spin" aria-hidden="true" />
+          Loading audiobook chapters...
+        </div>
+      ) : null}
+      {bookLoadError ? (
+        <div
+          className="mx-auto flex h-full min-h-64 max-w-xl flex-col items-center justify-center gap-4 px-6 text-center"
+          role="alert"
+        >
+          <p className="text-sm text-destructive">{bookLoadError}</p>
+          <div className="flex flex-wrap justify-center gap-3">
+            {initialBookId ? (
+              <Button
+                type="button"
+                variant="outline"
+                onPress={() => setLoadAttempt((attempt) => attempt + 1)}
+              >
+                Try again
+              </Button>
+            ) : null}
+            <Button type="button" onPress={startNewBook}>
+              Back to upload
+            </Button>
+          </div>
+        </div>
+      ) : null}
       {createdBook ? (
         <ChapterSelection
           book={createdBook}

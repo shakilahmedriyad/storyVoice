@@ -7,10 +7,16 @@ export type CreatedAudioBook = {
   book_name: string;
   book_id: number;
   total_chapters: number;
-  language: string;
+  language?: string;
   storytelling_style: string;
   pacing: string;
   chapters: AudioBookChapter[];
+};
+
+export type GetAudioBookResponse = {
+  message: string;
+  code: number;
+  data: CreatedAudioBook;
 };
 
 export type CreateAudioBookResponse = {

@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Form, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from db.database import get_db
 from utils.schema.Ctx import Ctx
@@ -14,25 +15,52 @@ from .service import (
     save_chapters_to_db,
 )
 from .schemas import CreateAudioBookSchema
-from .models.model import Book
+from .models.model import Book, Chapter
 
 router = APIRouter(prefix="/converter", tags=["Audio Book Converter"])
 
 
-@router.get("/")
+@router.get("/{book_id}")
 async def get_audio_book(
     book_id: int,
     ctx: Ctx = Depends(get_user),
     db: AsyncSession = Depends(get_db),
 ):
+
     user = ctx.user
+
     book = await db.execute(
-        select(Book).where(Book.user_id == user.id, Book.id == book_id)
+        select(Book)
+        .where(Book.user_id == user.id, Book.id == book_id)
+        .options(
+            selectinload(Book.chapters)
+        )  # Eagerly load chapters to avoid lazy loading issues
     )
+
+    book = book.scalar_one_or_none()
+
+    if not book:
+        raise HTTPException(
+            status_code=404,
+            detail="Book not found.",
+        )
+    chapters = book.chapters
+
+    data = {
+        "book_name": book.name,
+        "book_id": book.id,
+        "total_chapters": len(chapters),
+        "storytelling_style": book.style,
+        "pacing": book.pacing,
+        "chapters": [
+            {"title": chapter.title, "id": chapter.id} for chapter in chapters
+        ],
+    }
 
     return {
         "message": "success",
         "code": 200,
+        "data": data,
     }
 
 
