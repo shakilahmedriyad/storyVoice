@@ -1,18 +1,18 @@
 import apiClient from "@/lib/fast-api-client/axiosClient";
+import type { CreateAudioBookResponse } from "@/feature/create-audio-book/types";
 
 export default function useCreateAudioBook() {
   const createAudioBook = async (data: FormData) => {
-    try {
-      const response = await apiClient.post("/api/converter", data, {
+    const response = await apiClient.post<CreateAudioBookResponse>(
+      "/api/converter",
+      data,
+      {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      });
-      return response.data;
-    } catch (error) {
-      console.log("Error creating audio book:", error);
-      // we will handle error later
-    }
+      },
+    );
+    return response.data;
   };
 
   return { createAudioBook };

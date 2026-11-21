@@ -42,6 +42,13 @@ async def extract_from_table_of_contents(
 ) -> list[ChapterConfig] | None:
     contents = await file.read()
     document = pymupdf.open(stream=contents, filetype="pdf")
+    # 2. EXTRACT THE FIRST PAGE AS AN IMAGE
+    if len(document) > 0:
+        first_page = document.load_page(0)
+        pix = first_page.get_pixmap()
+
+        pix.save("first_page.png")
+
     toc = document.get_toc()
     if not toc:
         return None
