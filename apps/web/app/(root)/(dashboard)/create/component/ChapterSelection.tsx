@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Check, ListMusic } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -7,19 +8,16 @@ import type { CreatedAudioBook } from "@/feature/create-audio-book/types";
 
 type ChapterSelectionProps = {
   book: CreatedAudioBook;
-  selectedChapterIds: number[];
-  confirmedChapterIds: number[] | null;
-  onSelectionChange: (chapterIds: number[]) => void;
-  onConfirm: (chapterIds: number[]) => void;
 };
 
-export default function ChapterSelection({
-  book,
-  selectedChapterIds,
-  confirmedChapterIds,
-  onSelectionChange,
-  onConfirm,
-}: ChapterSelectionProps) {
+export default function ChapterSelection({ book }: ChapterSelectionProps) {
+  const [selectedChapterIds, setSelectedChapterIds] = useState<number[]>(() =>
+    book.chapters.map((chapter) => chapter.id),
+  );
+  const [confirmedChapterIds, setConfirmedChapterIds] = useState<
+    number[] | null
+  >(null);
+
   const allSelected =
     book.chapters.length > 0 &&
     selectedChapterIds.length === book.chapters.length;
@@ -33,13 +31,15 @@ export default function ChapterSelection({
       ? [...selectedChapterIds, chapterId]
       : selectedChapterIds.filter((id) => id !== chapterId);
 
-    onSelectionChange(nextSelection);
+    setSelectedChapterIds(nextSelection);
+    setConfirmedChapterIds(null);
   }
 
   function toggleAllChapters() {
-    onSelectionChange(
+    setSelectedChapterIds(
       allSelected ? [] : book.chapters.map((chapter) => chapter.id),
     );
+    setConfirmedChapterIds(null);
   }
 
   return (
@@ -135,7 +135,7 @@ export default function ChapterSelection({
             type="button"
             className="sm:ml-auto"
             isDisabled={selectedChapterIds.length === 0}
-            onPress={() => onConfirm(selectedChapterIds)}
+            onPress={() => setConfirmedChapterIds(selectedChapterIds)}
           >
             Confirm selection
           </Button>

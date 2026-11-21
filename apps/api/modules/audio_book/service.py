@@ -9,12 +9,14 @@ from utils.schema.Ctx import UserModel
 from common.audio_converter.audio_converter import start_audio_converter
 from common.audio_converter.state import ChapterConfig
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 
 from .models.model import Book, Chapter
 from .schemas import CreateAudioBookSchema
 
 
+# creating audio book
 async def create_audio_book(
     chapters: list[ChapterConfig],
     language: str,
@@ -29,6 +31,7 @@ async def create_audio_book(
     )
 
 
+# save the text book to the database
 async def save_audio_book(
     form_data: CreateAudioBookSchema,
     user: UserModel,
@@ -71,6 +74,7 @@ def clean(text: str) -> str:
     return _CONTROL_CHARS.sub("", text)  # NUL and other control chars
 
 
+# save the chapters to the database
 async def save_chapters_to_db(
     chapters: list[ChapterConfig],
     book: Book,
@@ -92,3 +96,15 @@ async def save_chapters_to_db(
 
     await db.commit()
     return local_chapters
+
+
+## get the book from the database
+async def get_book_from_db(book_id: int, user: UserModel, db: AsyncSession):
+    book = await db.execute(
+        select(Book)
+        .where(Book.user_id == user.id, Book.id == book_id)
+        .options(selectinload(Book.chapters))
+    )
+
+    book = book.scalar_one_or_none()
+    return book

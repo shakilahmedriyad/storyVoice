@@ -15,7 +15,7 @@ import {
   FormError,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import ChapterSelection from "@/feature/create-audio-book/components/ChapterSelection";
+import ChapterSelection from "./ChapterSelection";
 import {
   Select,
   SelectContent,
@@ -26,9 +26,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import useCreateAudioBook from "@/feature/create-audio-book/hooks/use-create-audio-book";
 import useGetAudioBook from "@/feature/create-audio-book/hooks/use-get-audio-book";
-import type {
-  CreatedAudioBook,
-} from "@/feature/create-audio-book/types";
+import type { CreatedAudioBook } from "@/feature/create-audio-book/types";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
@@ -77,10 +75,6 @@ export default function CreateAudioBookForm({
   const [isLoadingBook, setIsLoadingBook] = useState(Boolean(initialBookId));
   const [bookLoadError, setBookLoadError] = useState<string | null>(null);
   const [loadAttempt, setLoadAttempt] = useState(0);
-  const [selectedChapterIds, setSelectedChapterIds] = useState<number[]>([]);
-  const [confirmedChapterIds, setConfirmedChapterIds] = useState<number[] | null>(
-    null,
-  );
   const { createAudioBook } = useCreateAudioBook();
   const { getAudioBook } = useGetAudioBook();
   const form = useForm<
@@ -119,8 +113,6 @@ export default function CreateAudioBookForm({
         }
 
         setCreatedBook(response.data);
-        setSelectedChapterIds(response.data.chapters.map((chapter) => chapter.id));
-        setConfirmedChapterIds(null);
       })
       .catch((error: unknown) => {
         if (!controller.signal.aborted) {
@@ -182,8 +174,6 @@ export default function CreateAudioBookForm({
       window.history.replaceState(null, "", currentUrl);
 
       setCreatedBook(response.data);
-      setSelectedChapterIds(response.data.chapters.map((chapter) => chapter.id));
-      setConfirmedChapterIds(null);
     } catch {
       form.setError("root.server", {
         message: "Something went wrong while creating your audiobook.",
@@ -391,16 +381,7 @@ export default function CreateAudioBookForm({
         </div>
       ) : null}
       {createdBook ? (
-        <ChapterSelection
-          book={createdBook}
-          selectedChapterIds={selectedChapterIds}
-          confirmedChapterIds={confirmedChapterIds}
-          onSelectionChange={(chapterIds) => {
-            setSelectedChapterIds(chapterIds);
-            setConfirmedChapterIds(null);
-          }}
-          onConfirm={setConfirmedChapterIds}
-        />
+        <ChapterSelection key={createdBook.book_id} book={createdBook} />
       ) : null}
     </main>
   );

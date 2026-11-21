@@ -11,6 +11,7 @@ from utils.get_user import get_user
 from common.chapter_separator.chapter_extractor import extract_chapters
 from .service import (
     create_audio_book as run_audio_book_creation,
+    get_book_from_db,
     save_audio_book,
     save_chapters_to_db,
 )
@@ -29,15 +30,7 @@ async def get_audio_book(
 
     user = ctx.user
 
-    book = await db.execute(
-        select(Book)
-        .where(Book.user_id == user.id, Book.id == book_id)
-        .options(
-            selectinload(Book.chapters)
-        )  # Eagerly load chapters to avoid lazy loading issues
-    )
-
-    book = book.scalar_one_or_none()
+    book = await get_book_from_db(book_id, user, db)
 
     if not book:
         raise HTTPException(
@@ -97,4 +90,29 @@ async def create_audio_book(
         "message": "success",
         "code": 200,
         "data": data,
+    }
+
+
+@router.post("/start")
+async def start_audio_book_creation(
+    book_id: int,
+    selected_chapters: list[int] | None = None,
+    ctx: Ctx = Depends(get_user),
+    db: AsyncSession = Depends(get_db),
+):
+    print(f"Selected chapters: {selected_chapters}")
+    user = ctx.user
+    # book = await get_book_from_db(book_id, user, db)
+
+    # await run_audio_book_creation(
+    #     chapters=chapters,
+    #     language=book.language,
+    #     storytelling_style=book.style,
+    #     pacing=book.pacing,
+    # )
+
+    return {
+        "message": "Audio book creation started successfully.",
+        "code": 200,
+        "data": {"book_id": book.id},
     }

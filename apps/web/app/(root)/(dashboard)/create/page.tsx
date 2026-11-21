@@ -1,5 +1,5 @@
-import NavHeader from "./navheader";
-import CreateAudioBookForm from "./CreateAudioBookForm";
+import NavHeader from "./component/NavHeader";
+import CreateAudioBookForm from "./component/CreateAudioBookForm";
 import requireAuth from "@/lib/requireAuth";
 
 type CreatePageProps = {
@@ -9,7 +9,9 @@ type CreatePageProps = {
 export default async function CreatePage({ searchParams }: CreatePageProps) {
   await requireAuth();
   const params = await searchParams;
-  const bookId = Array.isArray(params.bookId) ? params.bookId[0] : params.bookId;
+  const bookId = Array.isArray(params.bookId)
+    ? params.bookId[0]
+    : params.bookId;
 
   return (
     <div className="w-full flex flex-col">
